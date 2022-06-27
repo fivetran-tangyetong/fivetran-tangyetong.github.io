@@ -110,9 +110,6 @@ author:
   location         : "Singapore"
   email            : "ytyt0792@gmail.com"
   links:
-    - label: "Email"
-      icon: "fas fa-fw fa-envelope-square"
-      url: "ytyt0792@gmail.com"
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/darkvoid32"
