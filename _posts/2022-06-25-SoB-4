@@ -1,0 +1,60 @@
+---
+title:  "Broadcasting transaction with multiple recipients using BDK-Kotlin"
+classes: wide
+---
+
+A quick guide on how to use the [`BDK-Kotlin 0.7.0`](https://github.com/bitcoindevkit/bdk-kotlin) library to create a send transaction with multiple recipients. 
+You can use the [`Padawan Wallet`](https://github.com/thunderbiscuit/padawan-wallet) and [`dev-kit`](https://github.com/thunderbiscuit/devkit-wallet/tree/simple-wallet) open-source projects as reference. 
+
+## TxBuilder
+
+Creating a transaction with multiple recipients is trivially easy to do using `BDK-Kotlin`. After you have created a wallet, you can use the `TxBuilder()` object with all the recipient address.
+
+``` kotlin
+val faucetAddress1 = "tb1ql7w62elx9ucw4pj5lgw4l028hmuw80sndtntxt"
+val faucetAddress2 = "mv4rnyY3Su5gjcDNzbMLKBQkBicCtHUtFB"
+val txBuilder = TxBuilder()
+	.addRecipient(faucetAddress1, 1000u)
+	.addRecipient(faucetAddress2, 1000u)
+	.feeRate(1.2f)
+val psbt = txBuilder.finish(wallet)
+```
+
+All you have to do is to call `.addRecipient(address: String, amount: ULong)` to the `TxBuilder()` builder object. 
+
+### Using lists to create the transaction
+
+The dot notations used on the `TxBuilder` object does not work on the actual object itself, but returns the new `TxBuilder` object.
+To elaborate what I mean, here is an example of using a list to add recipients :
+
+``` kotlin
+val txBuilder = TxBuilder()
+for (recipient in recipientList) {
+	 txBuilder.addRecipient(address = recipient.first, amount = recipient.second)
+}
+txBuilder.feeRate(satPerVbyte = feeRate)
+return txBuilder.finish(wallet)
+```
+
+In the above, the `TxBuilder` object at the end will not have the recipients nor the fee rate inside, since we are not using the returned `TxBuilder`. 
+
+``` kotlin
+var txBuilder = TxBuilder()
+for (recipient in recipientList) {
+	txBuilder = txBuilder.addRecipient(address = recipient.first, amount = recipient.second)
+}
+txBuilder = txBuilder.feeRate(satPerVbyte = feeRate)
+return txBuilder.finish(wallet)
+```
+
+You can write this piece of logic however you want, but to give an example of using scopes to read the `recipientList` data :
+
+``` kotlin 
+val psbt = recipientList.fold(TxBuilder()) { builder, recipient ->
+    builder.addRecipient(recipient.address, recipient.amount)
+}.finish(wallet)
+```
+
+## Sign & Broadcast
+
+After you have the `PSBT` object you can do whatever you want with it! Sign and broadcast with the `Wallet` and `Blockchain` object to send out the transaction.
